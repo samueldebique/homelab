@@ -60,7 +60,7 @@ def monitor_web():
             send_discord(msg)
 
 
-#Run both watchers
+#Run both watchers 
 if __name__ == "__main__":
     import threading
     t1 = threading.Thread(target=monitor_ssh, daemon=True)
