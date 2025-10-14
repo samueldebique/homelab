@@ -19,8 +19,8 @@ curl -fsSL https://get.docker.com | sh
 ```
 
 ## 2. Directory Structure
-/data/arr/
-    ├── jellyfin/
+/data/arr/ /n
+    ├── jellyfin/ /n
     ├── qbittorrent/
     ├── radarr/
     ├── sonarr/
