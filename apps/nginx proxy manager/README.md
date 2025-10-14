@@ -43,11 +43,11 @@ At your domain provider (e.g. Namecheap, Cloudflare, or GoDaddy), create A recor
 
 ### Access the Dashboard
 
-Open a browser and go to: http://<your-NPM-IP>:81
+Open a browser and go to: http://your-NPM-IP:81
 
 You should see the login screen. The default credentials are:
-Email:    admin@example.com
-Password: changeme
+- Email:    admin@example.com
+- Password: changeme
 After logging in, you’ll be asked to change these details. Use a real email address so Let’s Encrypt notifications can reach you.
 
 To expose your Jellyfin server, click Hosts → Proxy Hosts → Add Proxy Host. In the Details tab, enter your subdomain , select http as the scheme, set the Forward Hostname / IP to your Jellyfin machine, and the Forward Port to 8096. Make sure to tick Websockets Support and Block Common Exploits to ensure compatibility and security.
