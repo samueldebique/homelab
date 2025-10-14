@@ -18,16 +18,16 @@ Install Docker:
 curl -fsSL https://get.docker.com | sh
 ```
 
-## 2. Directory Structure
-/data/arr/ /n
-    ├── jellyfin/ /n
-    ├── qbittorrent/
-    ├── radarr/
-    ├── sonarr/
-    ├── prowlarr/
-    ├── bazarr/
-    └── jellyseerr/
-
+```bash
+/data/arr/
+├── jellyfin/
+├── qbittorrent/
+├── radarr/
+├── sonarr/
+├── prowlarr/
+├── bazarr/
+└── jellyseerr/
+```
 ## 3. Docker Compose Setup
 
 ``` bash
