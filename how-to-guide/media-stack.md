@@ -4,14 +4,7 @@
 > Designed for homelab environments — use responsibly and for educational purposes only.
 
 ---
-
-## 1. Prerequisites
-
-Before starting, ensure your system has:
-- Ubuntu or Debian-based OS  
-- Docker and Docker Compose installed  
-- Correctly forwarded ports **(80, 443, and any app-specific ports)**  
-- Sufficient storage under `/data/arr`
+## 1. Installation
 
 Install Docker:
 ```bash
@@ -19,25 +12,27 @@ curl -fsSL https://get.docker.com | sh
 ```
 
 ```bash
-/data/arr/
+~/data/arr/
 ├── jellyfin/
 ├── qbittorrent/
 ├── radarr/
 ├── sonarr/
 ├── prowlarr/
 ├── bazarr/
+├── gluetun/
 └── jellyseerr/
+
 ```
-## 3. Docker Compose Setup
+## 2. Docker Compose Setup
 
 ``` bash
-mkdir -p ~/arr && cd ~/arr
+mkdir -p ~/data && cd ~/data
 nano docker-compose.yml
 ```
 
 Put all the docker configs into this docker compose
 
-## 4. Launch the Stack
+## 3. Launch the Stack
 Once your file is saved, start everything:
 ```bash
 sudo docker compose up -d
@@ -46,8 +41,12 @@ To view running containers:
 ```bash
 docker ps
 ```
+Different folders will be mix match between being created by root or the user. 
+```bash
+sudo chown -R 1000:1000 /data/arr
+```
 
-## 5. Connecting Services
+## 4. Connecting Services
 1.	qBittorrent → Radarr/Sonarr
 	•	Host: localhost
 	•	Port: 8080
