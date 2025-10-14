@@ -6,7 +6,6 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=ETC/UTC
-#      - JELLYFIN-PublishedServerUrl=http://192.168.0.5
     ports:
      - "8096:8096"
     volumes:
