@@ -14,7 +14,7 @@ This guide walks through creating and configuring a **Windows 11** virtual machi
   <img width="573" height="283" alt="image" src="https://github.com/user-attachments/assets/cf41aab5-5bd6-4d5f-98f1-e5767b748f1f" />
 
   
-3. - Add **QEMU Guest Agent** support.
+3. Add **QEMU Guest Agent** support.
 
 
    <img width="578" height="270" alt="image" src="https://github.com/user-attachments/assets/c896649d-0c1b-4875-bac9-ffcef12dece4" />
@@ -27,7 +27,10 @@ if its on ssd choose these settings
 
 
 4. **Choose “Host” CPU type** for best performance.  
-- If migrating between Proxmox nodes with different CPUs, use a compatible type (e.g. `x86-64-v2`).  
+- If migrating between Proxmox nodes with different CPUs, use a compatible type (e.g. `x86-64-v2`).
+
+  <img width="578" height="135" alt="image" src="https://github.com/user-attachments/assets/bcabe349-f472-4157-987d-d4a028eec974" />
+
 2. **Enable VirtIO network and storage drivers**:
 - Add VirtIO device for disk and network.  
 - Under “Options”, ensure the boot order lists your Windows ISO **first**.
