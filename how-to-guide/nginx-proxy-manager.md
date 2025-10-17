@@ -39,7 +39,7 @@ curl ifconfig.me
 
 ## Configuration
 
-At your domain provider (e.g. Namecheap, Cloudflare, or GoDaddy), create A records that point your domain and subdomains to your public IP. For example, set one for your root domain (@) and another for a specific service like Jellyfin. Once done, log in to your router and forward ports 80 and 443 to your server’s local IP. This ensures traffic from the internet can reach your proxy and allows Let’s Encrypt to verify your domain for SSL certificates.
+At your domain provider (e.g. Namecheap, Cloudflare, or GoDaddy), create A records that point your subdomains to your public IP. For example, set for a specific service like Jellyfin. Once done, log in to your router and forward ports 80 and 443 to your server’s local IP. This ensures traffic from the internet can reach your proxy and allows Let’s Encrypt to verify your domain for SSL certificates.
 
 ### Access the Dashboard
 
