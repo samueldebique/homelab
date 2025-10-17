@@ -8,12 +8,16 @@ This guide walks through creating and configuring a **Windows 11** virtual machi
 1. **Download the Windows 11 ISO** and **VirtIO ISO**.  
 2. In Proxmox, create a new VM:  
    - Choose **Windows 11** as the Guest OS.  
-   - And add additonal drive for VirtIO driver and attach the VirtoIO driver. 
+   - And add additonal drive for VirtIO driver and attach the VirtoIO driver.
+     
   <img width="573" height="283" alt="image" src="https://github.com/user-attachments/assets/cf41aab5-5bd6-4d5f-98f1-e5767b748f1f" />
-3. - Add **QEMU Guest Agent** support.  
+  
+3. - Add **QEMU Guest Agent** support.
+     
    <img width="578" height="270" alt="image" src="https://github.com/user-attachments/assets/c896649d-0c1b-4875-bac9-ffcef12dece4" />
 
 if its on ssd choose these settings 
+
 <img width="571" height="370" alt="image" src="https://github.com/user-attachments/assets/3a36de0b-8e3c-4f76-8f73-6ec108be3cb1" />
 
 4. **Choose “Host” CPU type** for best performance.  
@@ -21,6 +25,7 @@ if its on ssd choose these settings
 2. **Enable VirtIO network and storage drivers**:
    - Add VirtIO device for disk and network.  
    - Under “Options”, ensure the boot order lists your Windows ISO **first**.
+     
 <img width="579" height="181" alt="image" src="https://github.com/user-attachments/assets/20ecedfb-0c6c-4d5e-9cc4-a70d922954be" />
 
 
@@ -28,6 +33,7 @@ if its on ssd choose these settings
 1. Start the VM — if you see  
    > “No bootable disk found”  
    open the **Boot Order** settings and move the Windows ISO to the top.
+   
    <img width="509" height="158" alt="image" src="https://github.com/user-attachments/assets/ed6efaab-9f8f-447b-ac54-75f2d573c8ea" />
 
 2. Proceed with the installer.  
