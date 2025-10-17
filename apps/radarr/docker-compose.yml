@@ -2,7 +2,8 @@ service:
   radarr:
       image: lscr.io/linuxserver/radarr:latest
       container_name: radarr
-      network_mode: "service:gluetun"
+      ports:
+        - 7878:7878
       environment:
         - PUID=1000
         - PGID=1000
