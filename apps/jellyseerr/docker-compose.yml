@@ -1,0 +1,13 @@
+service:
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - LOG_LEVEL=info
+      - TZ=Etc/UTC
+    volumes:
+      - /path/to/jellyseerr/config:/app/config
+    restart: unless-stopped
