@@ -45,27 +45,27 @@ Jellyfin — http://<your_ip>:8096
 	-	/path/to/tvshows
 	
 ### 5. Log onto Radarr
-Radarr — http://<your_ip>:7878
-Create an admin user and save the credentials
+- Radarr — http://<your_ip>:7878
+- Create an admin user and save the credentials
 	1.	Set Authentication Method → Forms
 	2.	Navigate to Settings -> Download Clients -> Add -> Transmission 
 	3.	Navigate to Settings -> Media Management -> Add Root Folder 
 	4.	Navigate to Settings -> General -> API Key -> copy it for the next steps 
 	
 ### 6. Log onto Sonarr
-Sonarr — http://<your_ip>:8989
-Same steps as Radarr
+- Sonarr — http://<your_ip>:8989
+- Same steps as Radarr
 
 ### 7. Log onto Prowlarr
-Prowlarr — http://<your_ip>:9696
-Create an admin user and save the credentials
-Navigate to Settings -> Apps -> Add:
+- Prowlarr — http://<your_ip>:9696
+- Create an admin user and save the credentials
+- Navigate to Settings -> Apps -> Add:
 	- 	Radarr (paste API key)
 	-	Sonarr (paste API key)
-Go back to Indexers -> Add New Indexers
+- Go back to Indexers -> Add New Indexers
 
 ### 7. Log onto jellyseerr
-Jellyseerr (optional) — http://<your_ip>:5055
+- Jellyseerr (optional) — http://<your_ip>:5055
 	1.	Log in with Jellyfin admin account.
 	2.	Add Radarr and Sonarr:
 	 -	Hostname: localhost
