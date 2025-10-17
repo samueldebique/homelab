@@ -43,20 +43,35 @@ sudo chown -R 1000:1000 /data
 	2.	Add media libraries:
 	-	/path/to/movie
 	-	/path/to/tvshows
-	
-### 5. Log onto Radarr
+
+### 5. Log onto Qbittorrent
+- qBittorrent — http://<your_ip>:8080
+  1. Get the temporary password using:
+     ```bash
+     docker ps
+     ```
+     To get the container ID of qbitttorent
+
+	```bash
+	sudo docker logs  <container id>
+ 	```
+ 	The temp password should be at the bottom
+  2. go to tools webui to change password and press bypass auth for clients on local host
+  
+### 6. Log onto Radarr
 - Radarr — http://<your_ip>:7878
 - Create an admin user and save the credentials
 	1.	Set Authentication Method → Forms
 	2.	Navigate to Settings -> Download Clients -> Add -> Transmission 
 	3.	Navigate to Settings -> Media Management -> Add Root Folder 
-	4.	Navigate to Settings -> General -> API Key -> copy it for the next steps 
+	4.	Navigate to Settings -> General -> API Key -> copy it for the next steps
+ 	5.	Settings -> Download clients -> Add qbittorrent
 	
-### 6. Log onto Sonarr
+### 7. Log onto Sonarr
 - Sonarr — http://<your_ip>:8989
 - Same steps as Radarr
 
-### 7. Log onto Prowlarr
+### 8. Log onto Prowlarr
 - Prowlarr — http://<your_ip>:9696
 - Create an admin user and save the credentials
 - Navigate to Settings -> Apps -> Add:
@@ -64,7 +79,7 @@ sudo chown -R 1000:1000 /data
 	-	Sonarr (paste API key)
 - Go back to Indexers -> Add New Indexers
 
-### 7. Log onto jellyseerr
+### 9. Log onto jellyseerr
 - Jellyseerr (optional) — http://<your_ip>:5055
 	1.	Log in with Jellyfin admin account.
 	2.	Add Radarr and Sonarr:
