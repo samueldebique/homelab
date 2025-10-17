@@ -51,7 +51,6 @@ sudo chown -R 1000:1000 /data
      docker ps
      ```
      To get the container ID of qbitttorent
-
 	```bash
 	sudo docker logs  <container id>
  	```
