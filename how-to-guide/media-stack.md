@@ -38,7 +38,7 @@ Different folders will be mix match between being created by root or the user.
 sudo chown -R 1000:1000 /data/arr
 ```
 ### 4. Log onto jellyfin
-Jellyfin — http://<your_ip>:8096
+- Jellyfin — http://<your_ip>:8096
 	1.	Create an admin user and save credentials.
 	2.	Add media libraries:
 	-	/path/to/movie
