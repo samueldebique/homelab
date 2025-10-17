@@ -14,7 +14,7 @@ sudo usermod -aG docker user
 ```
 Now exit and switch user to update your permissions
 ```bash
-exit && su samuel
+exit && su user
 ```
 
 Now make the folder to store your compose files
@@ -35,7 +35,7 @@ docker ps
 ```
 Different folders will be mix match between being created by root or the user. 
 ```bash
-sudo chown -R 1000:1000 /data/arr
+sudo chown -R 1000:1000 /data
 ```
 ### 4. Log onto jellyfin
 - Jellyfin — http://<your_ip>:8096
