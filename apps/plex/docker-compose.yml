@@ -1,0 +1,16 @@
+service:
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - PLEX_CLAIM=claim_besQF2Ld7y_V4f6agkq8
+    ports:
+      - 32400:32400
+    volumes:
+      - /path/to/plex/config:/config
+      - /path/to/tvseries:/data/tvshows
+      - /path/to/movies:/data/movies
+    restart: unless-stopped
