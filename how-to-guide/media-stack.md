@@ -50,12 +50,12 @@ sudo chown -R 1000:1000 /data
      ```bash
      docker ps
      ```
-     To get the container ID of qbitttorent
+  2. To get the container ID of qbitttorent
 	```bash
 	sudo docker logs  <container id>
  	```
  	The temp password should be at the bottom
-  2. go to tools webui to change password and press bypass auth for clients on local host
+  3. go to tools webui to change password and press bypass auth for clients on local host
   
 ### 6. Log onto Radarr
 - Radarr — http://<your_ip>:7878
