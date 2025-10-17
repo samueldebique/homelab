@@ -1,0 +1,15 @@
+service:
+  radarr:
+      image: lscr.io/linuxserver/radarr:latest
+      container_name: radarr
+      network_mode: "service:gluetun"
+      environment:
+        - PUID=1000
+        - PGID=1000
+        - TZ=Etc/UTC
+      volumes:
+        - /path/to/radarr/config:/config
+        - /path/to/movies:/movies 
+        - /path/to/downloads:/downloads 
+      restart: unless-stopped
+
