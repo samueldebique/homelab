@@ -9,7 +9,7 @@ services:
     ports:
      - "8096:8096"
     volumes:
-      - /data/arr/jellyfin/config:/config
-      - /data/arr/sonarr/tvseries:/tvshows
-      - /data/arr/radarr/movies:/movies
+      - /path/to/jellyfin/config:/config
+      - /path/to/tvseries:/tvshows
+      - /path/to/movies:/movies
     restart: unless-stopped
