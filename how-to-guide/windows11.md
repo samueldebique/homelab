@@ -20,18 +20,20 @@ This guide walks through creating and configuring a **Windows 11** virtual machi
    <img width="578" height="270" alt="image" src="https://github.com/user-attachments/assets/c896649d-0c1b-4875-bac9-ffcef12dece4" />
 
 
-if its on ssd choose these settings 
+4. If you are installing this on an SSD enable these settings
 
 
 <img width="571" height="370" alt="image" src="https://github.com/user-attachments/assets/3a36de0b-8e3c-4f76-8f73-6ec108be3cb1" />
 
 
-4. **Choose “Host” CPU type** for best performance.  
+5. **Choose “Host” CPU type** for best performance.  
 - If migrating between Proxmox nodes with different CPUs, use a compatible type (e.g. `x86-64-v2`).
+
 
   <img width="578" height="135" alt="image" src="https://github.com/user-attachments/assets/bcabe349-f472-4157-987d-d4a028eec974" />
 
-2. **Enable VirtIO network and storage drivers**:
+
+6. **Enable VirtIO network and storage drivers**:
 - Add VirtIO device for disk and network.  
 - Under “Options”, ensure the boot order lists your Windows ISO **first**.
      
@@ -51,8 +53,6 @@ if its on ssd choose these settings
 - Browse to the **VirtIO ISO** → `viostor\w11\amd64`.  
 - Load the driver, and your disk should now appear.  
 4. Continue installation normally.
-
-![VirtIO Load Driver](./6454CA45-FA59-4052-AE8A-F6B56728461E.png)
 
 
 ## Step 3: Post-Install Drivers
