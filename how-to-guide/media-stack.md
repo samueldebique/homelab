@@ -1,90 +1,155 @@
-# Media Stack Setup Guide
+# Self-Hosted Wikipedia with Kiwix on Proxmox
 
-## 1. Installation
+Run offline Wikipedia (115GB) from a Proxmox LXC, accessible to all devices on your network.
 
-Install Docker:
+## Architecture
+
+```
+Proxmox Host
+├── /mnt/pve/tank/zim/           ← ZIM files (external HDD)
+└── LXC (kiwix)
+    ├── Ubuntu 24.04
+    ├── kiwix-serve on port 8080
+    └── /data → bind mount to /mnt/pve/tank/zim/ (read-only)
+```
+
+## Step 1: Download Wikipedia
+
+On the Proxmox host:
+
 ```bash
-curl -fsSL https://get.docker.com | sh
+mkdir -p /mnt/pve/tank/zim
+cd /mnt/pve/tank/zim
+apt install aria2 -y
+aria2c -x 16 -s 16 https://download.kiwix.org/zim/wikipedia/wikipedia_en_all_maxi_2026-02.zim
 ```
 
-### 2. Docker Compose Setup and Permissions
-Give yourself permissions to docker
+Check https://download.kiwix.org/zim/wikipedia/ for the latest dated filename.
+
+Other ZIMs available at https://download.kiwix.org/zim/ — Stack Overflow, Wikivoyage, Wiktionary, etc.
+
+## Step 2: Create the LXC
+
+In the Proxmox web UI, click **Create CT**:
+
+- **CT ID:** `102`
+- **Hostname:** `kiwix`
+- **Unprivileged:** ticked
+- **Template:** `ubuntu-24.04-standard`
+- **Storage:** `local-lvm`, 4GB disk
+- **CPU:** 1 core
+- **Memory:** 512MB RAM, 512MB swap
+- **Network:** vmbr0, DHCP
+
+Tick "Start after created" and click Finish.
+
+Note the LXC's IP from the Summary tab.
+
+## Step 3: Install Kiwix
+
+Open the LXC console and run:
+
 ```bash
-sudo usermod -aG docker user
+apt update && apt upgrade -y
+apt install kiwix-tools -y
+exit
 ```
-Now exit and switch user to update your permissions
+
+## Step 4: Add the Bind Mount
+
+On the Proxmox host:
+
 ```bash
-exit && su user
+pct stop 102
+nano /etc/pve/lxc/102.conf
 ```
 
-Now make the folder to store your compose files
-``` bash
-mkdir -p /data && cd /data
-nano docker-compose.yml
+Add this line at the bottom:
+
+```
+mp0: /mnt/pve/tank/zim,mp=/data,ro=1
 ```
 
+Save (Ctrl+X, Y, Enter), then:
 
-### 3. Launch the compose file
-Once your file is saved, start everything:
 ```bash
-sudo docker compose up -d
+pct start 102
+pct exec 102 -- ls -lh /data
 ```
-To view running containers:
+
+The Wikipedia ZIM should be visible. If you see "permission denied":
+
 ```bash
-docker ps
+chmod -R o+rX /mnt/pve/tank/zim
 ```
-Different folders will be mix match between being created by root or the user. 
+
+## Step 5: Create the systemd Service
+
+Inside the LXC:
+
 ```bash
-sudo chown -R 1000:1000 /data
+nano /etc/systemd/system/kiwix.service
 ```
-### 4. Log onto jellyfin
-- Jellyfin — http://<your_ip>:8096
-	1.	Create an admin user and save credentials.
-	2.	Add media libraries:
-	-	/path/to/movie
-	-	/path/to/tvshows
 
-### 5. Log onto Qbittorrent
-- qBittorrent — http://<your_ip>:8080
-  1. Get the temporary password using:
-     ```bash
-     docker ps
-     ```
-  2. To get the container ID of qbitttorent
-	```bash
-	sudo docker logs  <container id>
- 	```
- 	The temp password should be at the bottom
-  3. go to tools webui to change password and press bypass auth for clients on local host
-  
-### 6. Log onto Radarr
-- Radarr — http://<your_ip>:7878
-- Create an admin user and save the credentials
-	1.	Set Authentication Method → Forms
-	2.	Navigate to Settings -> Download Clients -> Add -> Transmission 
-	3.	Navigate to Settings -> Media Management -> Add Root Folder 
-	4.	Navigate to Settings -> General -> API Key -> copy it for the next steps
- 	5.	Settings -> Download clients -> Add qbittorrent
-	
-### 7. Log onto Sonarr
-- Sonarr — http://<your_ip>:8989
-- Same steps as Radarr
+Paste:
 
-### 8. Log onto Prowlarr
-- Prowlarr — http://<your_ip>:9696
-- Create an admin user and save the credentials
-- Navigate to Settings -> Apps -> Add:
-	- 	Radarr (paste API key)
-	-	Sonarr (paste API key)
-- Go back to Indexers -> Add New Indexers
+```ini
+[Unit]
+Description=Kiwix Serve
+After=network-online.target
+Wants=network-online.target
 
-### 9. Log onto jellyseerr
-- Jellyseerr (optional) — http://<your_ip>:5055
-	1.	Log in with Jellyfin admin account.
-	2.	Add Radarr and Sonarr:
-	 -	Hostname: localhost
-	 -	Port: 7878 (Radarr), 8989 (Sonarr)
-	 -	API Keys: from previous steps
-	3.	Enable Movies + TV Shows
-	4.	Set Root folders /movies and /tv
-	5.	Enable scan:true
+[Service]
+Type=simple
+ExecStart=/usr/bin/kiwix-serve --port=8080 /data/wikipedia_en_all_maxi_2026-02.zim
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Update the filename in `ExecStart` to match your ZIM. Save and run:
+
+```bash
+systemctl daemon-reload
+systemctl enable kiwix
+systemctl start kiwix
+systemctl status kiwix
+```
+
+Look for `Active: active (running)`.
+
+## Step 6: Access
+
+Open `http://<LXC-IP>:8080` in any browser on your network.
+
+The library search filters ZIMs by title, not articles. Click the Wikipedia tile to enter Wikipedia, then use Wikipedia's search bar.
+
+## Adding More ZIMs
+
+Drop new `.zim` files into `/mnt/pve/tank/zim/` on the host, update `ExecStart` in the service file (or use `/data/*.zim` to load all), then:
+
+```bash
+systemctl daemon-reload
+systemctl restart kiwix
+```
+
+## Updating Wikipedia
+
+```bash
+cd /mnt/pve/tank/zim
+wget -c https://download.kiwix.org/zim/wikipedia/wikipedia_en_all_maxi_<NEW-DATE>.zim
+# Update ExecStart in /etc/systemd/system/kiwix.service inside LXC
+systemctl daemon-reload && systemctl restart kiwix
+rm wikipedia_en_all_maxi_<OLD-DATE>.zim
+```
+
+## Troubleshooting
+
+**Library shows "No result"** — stale URL filter. Clear the URL to plain `http://<IP>:8080/` or use a private window.
+
+**`nobody:nogroup` ownership inside LXC** — normal for unprivileged containers. Not a problem if the file has world-read permissions (`-rw-r--r--`).
+
+**Service fails to start** — check logs: `journalctl -u kiwix --no-pager -n 50`. Usually filename mismatch in `ExecStart` or bind mount didn't apply.
+
