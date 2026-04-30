@@ -23,6 +23,7 @@ One LXC, two bind mounts, two Samba shares.
 
 - Proxmox host with bulk storage at `/mnt/pve/tank/`
 - LXC will use ~4GB disk on `local-lvm`, ~512MB RAM
+- Ubuntu 24.04 container template downloaded
 
 ## Setup
 
@@ -94,7 +95,7 @@ smbpasswd -a samuel
 
 Set a password — you’ll enter this once on the Mac, then macOS Keychain remembers it.
 
-### 7. Set ownership (from the Proxmox HOST)
+### 7. Set ownership (from the Proxmox host)
 
 Unprivileged LXCs map UIDs. `chown` from inside the container will fail with “Operation not permitted” — you have to do it from the host using mapped UIDs.
 
@@ -222,15 +223,10 @@ The `dk0=adVN=TimeMachine` MUST exactly match the share name `[TimeMachine]` in 
 ```bash
 systemctl restart smbd nmbd avahi-daemon
 systemctl enable smbd nmbd avahi-daemon
-```
-
-Verify all three are running:
-
-```bash
 systemctl status smbd nmbd avahi-daemon --no-pager
 ```
 
-Exit the LXC:
+All three should show green `Active: active (running)`. Exit the LXC:
 
 ```bash
 exit
@@ -349,7 +345,7 @@ Subsequent backups are incremental (minutes).
 
 **Bind mounts, not network protocols** for service-to-storage:
 
-- Apps that need media access (e.g., Jellyfin) get their OWN bind mount to `/mnt/pve/tank/data/media/`
+- Apps that need media access (e.g., Jellyfin) get their own bind mount to `/mnt/pve/tank/data/media/`
 - They don’t go through Samba — that’s only for Mac access
 - Direct kernel access, no overhead
 
