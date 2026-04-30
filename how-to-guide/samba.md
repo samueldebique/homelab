@@ -37,7 +37,7 @@ mkdir -p /mnt/pve/tank/data/media/{movies,tv,music,books,audiobooks}
 
 In Proxmox web UI → **Create CT**:
 
-- **CT ID:** 300
+- **CT ID:** `<CTID>` (pick the next free ID, e.g. 300)
 - **Hostname:** `samba`
 - **Unprivileged:** ticked
 - **Template:** `ubuntu-24.04-standard`
@@ -46,11 +46,13 @@ In Proxmox web UI → **Create CT**:
 - **Memory:** 512 MiB + 512 MiB swap
 - **Network:** vmbr0, DHCP
 
+> Replace `<CTID>` throughout the rest of this doc with the actual ID you chose.
+
 ### 3. Add bind mounts
 
 ```bash
-pct stop 300
-nano /etc/pve/lxc/300.conf
+pct stop <CTID>
+nano /etc/pve/lxc/<CTID>.conf
 ```
 
 Add at the bottom:
@@ -63,7 +65,7 @@ mp1: /mnt/pve/tank/data/media,mp=/media
 No `ro=1` — both shares need write access.
 
 ```bash
-pct start 300
+pct start <CTID>
 ```
 
 ### 4. Set DNS (if needed)
@@ -71,14 +73,14 @@ pct start 300
 If `apt update` fails inside the LXC with DNS errors, set DNS explicitly:
 
 ```bash
-pct set 300 --nameserver 1.1.1.1
-pct reboot 300
+pct set <CTID> --nameserver 1.1.1.1
+pct reboot <CTID>
 ```
 
 ### 5. Install Samba and Avahi
 
 ```bash
-pct enter 300
+pct enter <CTID>
 apt update && apt upgrade -y
 apt install samba avahi-daemon -y
 ```
@@ -109,8 +111,8 @@ chown -R 101000:101000 /mnt/pve/tank/data/media
 Verify from inside the LXC:
 
 ```bash
-pct exec 300 -- ls -la /tm
-pct exec 300 -- ls -la /media
+pct exec <CTID> -- ls -la /tm
+pct exec <CTID> -- ls -la /media
 ```
 
 Should show `samuel samuel` as owner.
@@ -120,7 +122,7 @@ Should show `samuel samuel` as owner.
 Back inside the LXC:
 
 ```bash
-pct enter 300
+pct enter <CTID>
 > /etc/samba/smb.conf
 nano /etc/samba/smb.conf
 ```
@@ -278,7 +280,7 @@ Folder structure:
 After first backup runs for ~10 minutes:
 
 ```bash
-pct exec 300 -- ls -lh /tm/
+pct exec <CTID> -- ls -lh /tm/
 ```
 
 Should show a `.sparsebundle` (encrypted Time Machine container).
@@ -286,7 +288,7 @@ Should show a `.sparsebundle` (encrypted Time Machine container).
 Watch backup progress:
 
 ```bash
-watch -n 5 'pct exec 300 -- du -sh /tm/'
+watch -n 5 'pct exec <CTID> -- du -sh /tm/'
 ```
 
 ## Troubleshooting
@@ -300,8 +302,8 @@ You’re running it from inside the LXC. You can’t — unprivileged LXCs can�
 DNS issue inside the LXC. Fix from the host:
 
 ```bash
-pct set 300 --nameserver 1.1.1.1
-pct reboot 300
+pct set <CTID> --nameserver 1.1.1.1
+pct reboot <CTID>
 ```
 
 ### Share doesn’t appear in Finder sidebar
