@@ -1,60 +1,82 @@
-# Proxmox Post-Install Setup Guide
+# Proxmox Post-Install Setup
 
-This guide picks up after the Proxmox VE installer finishes (so you've booted into your fresh install, pulled the USB, and can log into the web UI at `https://<your_ip>:8006`). It covers the essential post-install steps: fixing the repositories, running updates, removing the subscription nag, and adding additional drives as usable storage.
+Essential post-install steps for a fresh Proxmox VE: fix repositories, run updates, remove the subscription nag, and add additional drives as usable storage.
 
-## 1. Access the Web UI
+## What this gets you
 
-On another machine on the same network, open a browser and go to:
+- Working `apt update` (default repos fail with 401 Unauthorized)
+- Latest packages and kernel
+- No subscription nag dialog on every login
+- Static IP reservation
+- Additional drives added as storage for VMs/LXCs/ISOs
+
+## Architecture
+
 ```
-https://<your_proxmox_ip>:8006
+Proxmox host (pve)
+├── NVMe          → local-lvm (VMs/LXCs)
+├── SATA SSD      → Directory storage (ISOs, backups)
+└── External HDD  → Directory storage (bulk data)
 ```
 
-You'll get a certificate warning because Proxmox uses a self-signed cert — this is expected. Click **Advanced** → **Proceed**.
+## Prerequisites
+
+- Proxmox VE 8.x or 9.x installed and booted
+- Web UI reachable at `https://<host-IP>:8006`
+- Root password set during install
+
+## Setup
+
+### 1. Access the Web UI
+
+In a browser on another machine on the same network:
+
+```
+https://<your-proxmox-IP>:8006
+```
+
+Accept the self-signed cert warning (**Advanced** → **Proceed**).
 
 Log in with:
+
 - **User name:** `root`
-- **Password:** the one you set during install
+- **Password:** the one set during install
 - **Realm:** `Linux PAM standard authentication`
 
-## 2. Open the Shell
+### 2. Open the Shell
 
-In the web UI, click your node (e.g. `pve`) in the left sidebar, then click **Shell** in the middle panel. This gives you a root terminal directly in the browser — no SSH setup needed.
+In the web UI, click your node (e.g. `pve`) in the left sidebar → click **Shell** in the middle panel. This gives you a root terminal in the browser. No `sudo` needed.
 
-Proxmox logs you in as `root` by default, so you don't need `sudo` for any commands.
+### 3. Disable enterprise repositories
 
-## 3. Disable Enterprise Repositories
+Proxmox 9 uses the new `.sources` format. Add `Enabled: false` to each enterprise file.
 
-Proxmox ships pointing at the paid enterprise repos. Without disabling them, updates fail with `401 Unauthorized`.
-
-Proxmox 9 uses the new `.sources` format, so we add `Enabled: false` to each enterprise file.
-
-Open the first file:
 ```bash
 nano /etc/apt/sources.list.d/pve-enterprise.sources
 ```
 
-Add a new line at the bottom:
+Add at the bottom:
+
 ```
 Enabled: false
 ```
 
-Save and exit: **Ctrl+O**, Enter, **Ctrl+X**.
+Save (Ctrl+X, Y, Enter). Repeat for the Ceph enterprise repo:
 
-Do the same for the Ceph enterprise repo:
 ```bash
 nano /etc/apt/sources.list.d/ceph.sources
 ```
 
-Add `Enabled: false` at the bottom, save, exit.
+Add `Enabled: false`, save, exit.
 
-## 4. Add the No-Subscription Repository
+### 4. Add the no-subscription repository
 
-Create a new file for the free community repo:
 ```bash
 nano /etc/apt/sources.list.d/pve-no-subscription.sources
 ```
 
-Paste in:
+Paste:
+
 ```
 Types: deb
 URIs: http://download.proxmox.com/debian/pve
@@ -63,88 +85,128 @@ Components: pve-no-subscription
 Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
 ```
 
-Save and exit.
+`trixie` = Debian 13 (Proxmox 9). On Proxmox 8, use `bookworm`.
 
-`trixie` is Debian 13, used by Proxmox 9. On Proxmox 8, use `bookworm` instead.
+### 5. Update the system
 
-## 5. Update the System
-
-Refresh package lists:
 ```bash
 apt update
-```
-
-Run the full upgrade:
-```bash
 apt dist-upgrade -y
-```
-
-Use `dist-upgrade`, not `upgrade` — it handles kernel updates properly.
-
-Reboot to pick up the new kernel:
-```bash
 reboot
 ```
 
-Wait ~60 seconds, refresh your browser, log back in.
+Use `dist-upgrade`, not `upgrade` — it handles kernel updates properly. Wait ~60 seconds after reboot, refresh browser, log back in.
 
-## 6. Remove the Subscription Nag
+### 6. Remove the subscription nag
 
-Every login pops up a "No valid subscription" dialog. To remove it:
 ```bash
 sed -i.bak "s/data.status.*{/data.status \!== 'Active'){/g" /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js && systemctl restart pveproxy.service
 ```
 
-Hard-refresh your browser (Cmd+Shift+R / Ctrl+Shift+R). Re-run the command after major Proxmox updates if it comes back.
+Hard-refresh the browser (Cmd+Shift+R / Ctrl+Shift+R). Re-run after major Proxmox updates if the nag returns.
 
-## 7. Reserve a Static IP at Your Router
+### 7. Reserve a static IP at your router
 
-Proxmox's IP shouldn't change. The cleanest way is a DHCP reservation at your router:
-1. Log into your router's admin page (usually `192.168.1.1` or `192.168.0.1`)
-2. Find DHCP reservations / static leases
-3. Find your Proxmox node in the connected devices list
-4. Reserve its current IP
+1. Log into your router’s admin page (`192.168.1.1` or `192.168.0.1`)
+1. Find DHCP reservations / static leases
+1. Find your Proxmox node in the device list
+1. Reserve its current IP
 
-## 8. Wipe Additional Drives
+### 8. Wipe additional drives
 
-If you have a second drive with leftover data (e.g. an old install), wipe it from the web UI:
+If a second drive has leftover data from an old install:
+
 1. Click your node in the sidebar → **Disks**
-2. Select the drive (e.g. `sda`)
-3. Click **Wipe Disk** at the top
-4. Confirm
+1. Select the drive (e.g. `sda`)
+1. Click **Wipe Disk** at the top
+1. Confirm
 
 Do not wipe the drive Proxmox is installed on.
 
-## 9. Add Drives as Storage
+### 9. Add drives as storage
 
-Once wiped, add the drive as usable Proxmox storage. Pick a storage type based on what you plan to use it for.
+Pick a storage type based on intended use:
 
-**LVM-Thin** — for holding VM and LXC disks. Thin-provisioned, snapshot-capable, efficient. Best for fast drives (NVMe/SSD) where VMs will run.
+- **LVM-Thin** — for VM/LXC disks. Thin-provisioned, snapshot-capable. Best for fast drives (NVMe/SSD) where VMs run.
+- **Directory** — for ISOs, backups, templates. ext4 on top of the drive. Best for bulk storage where speed doesn’t matter.
+- **ZFS** — checksumming, snapshots, compression, built-in RAID. Needs ~1GB RAM per 1TB. Most useful with two or more drives to mirror. Overkill for single-drive setups. Create from **Disks** → **ZFS** → **Create: ZFS**.
 
-**Directory** — for ISOs, backups, templates. Simple filesystem (ext4) on top of the drive. Best for bulk storage where speed doesn't matter.
+For a typical homelab with one NVMe + one SATA SSD:
 
-**ZFS** — advanced option offering checksumming, snapshots, compression, and built-in RAID. Requires more RAM (roughly 1GB per 1TB of storage) and is most useful when you have **two or more drives to mirror**. Overkill for a single-drive home setup. ZFS pools can be created from **Disks → ZFS → Create: ZFS**.
-
-For a typical homelab with one NVMe + one SATA SSD, the sensible split is:
 - **NVMe** → LVM-Thin for VMs/LXCs (set up automatically by installer)
 - **SATA** → Directory for ISOs and backups
 
-## 10. Upload or Download ISOs
+### 10. Upload or download ISOs
 
-Before building a VM, you need an operating system ISO. In the web UI:
+In the web UI:
+
 - Click your node → expand the storage set up for ISOs (usually `local` or your new Directory)
-- Click **ISO Images** → **Upload** to upload one from your computer
-- Or click **Download from URL** to pull directly from the internet
+- Click **ISO Images** → **Upload** (from your computer) or **Download from URL** (direct)
 
-Handy ISO sources:
-- **Windows 11**: microsoft.com (download directly)
-- **VirtIO drivers** (needed for Windows VMs): `https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso`
+Useful sources:
+
+- **Windows 11**: microsoft.com
+- **VirtIO drivers** (for Windows VMs): `https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso`
 - **Ubuntu Server**: `https://ubuntu.com/download/server`
 - **Debian**: `https://www.debian.org/distrib/`
-- **LXC templates** (for containers): Proxmox has built-in downloads under **CT Templates → Templates**
+- **LXC templates**: built into Proxmox under **CT Templates** → **Templates**
 
-## 11. You're Done
+## Verifying it works
 
-Proxmox is fully set up. From here you can create VMs or LXC containers through the web UI.
+```bash
+apt update            # No 401 errors, lists pve-no-subscription repo
+pveversion            # Shows current Proxmox version
+df -h                 # All storage mounted and visible
+```
 
-Rule of thumb: LXC for lightweight Linux services (Pi-hole, Nginx, Docker host), VM for Windows or when you need full kernel-level isolation.
+In the web UI, check:
+
+- No subscription nag on login
+- All drives visible under **Datacenter** → **Storage**
+
+## Troubleshooting
+
+### `apt update` returns 401 Unauthorized
+
+Enterprise repo still enabled. Check `pve-enterprise.sources` and `ceph.sources` both have `Enabled: false` at the bottom.
+
+### Subscription nag returns after Proxmox update
+
+The patch in step 6 gets overwritten by major upgrades. Re-run the same command.
+
+### New drive doesn’t appear
+
+If the drive is brand new or has GPT/LVM remnants:
+
+1. **Disks** → select drive → **Wipe Disk**
+1. Then add it as storage
+
+### Lost access after reboot
+
+If the IP changed because no DHCP reservation was set, find the new IP via your router’s connected devices list. Then do step 7 properly.
+
+## Why this design
+
+**No-subscription repo** instead of paying for Enterprise:
+
+- Same packages, slightly delayed release
+- Fine for homelabs; Enterprise is for production support contracts
+
+**Three-tier storage by role:**
+
+- NVMe = compute (VM/LXC disks)
+- SATA SSD = backups
+- External HDD = bulk replaceable data
+
+**Directory over ZFS for single drives:**
+
+- ZFS only earns its keep with multiple disks
+- Wastes RAM on single-disk setups
+- ext4 is faster, simpler, and rock-solid for homelab scale
+
+## Key gotchas
+
+- Use `dist-upgrade`, not `upgrade` — kernel updates need it
+- The `.sources` format is new in Proxmox 9 — old `.list` syntax won’t work
+- Subscription nag patch must be re-run after every major Proxmox update
+- LXC for lightweight Linux services (Pi-hole, Nginx, Docker host); VM for Windows or full kernel-level isolation
