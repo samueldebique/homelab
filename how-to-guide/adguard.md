@@ -1,4 +1,4 @@
-# AdGuard Home LXC
+# AdGuard Home
 
 Network-wide DNS filtering in an LXC on Proxmox. Blocks ads, trackers, and malware for every device on the LAN.
 
