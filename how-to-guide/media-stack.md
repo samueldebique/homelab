@@ -1,90 +1,80 @@
-# Media Stack Setup Guide
+# Media Stack
 
-## 1. Installation
+Jellyfin, Radarr, Sonarr, Prowlarr, qBittorrent, and Jellyseerr running via Docker Compose.
 
-Install Docker:
+## Setup
+
+### 1. Install Docker
+
 ```bash
 curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+exit && su $USER
 ```
 
-### 2. Docker Compose Setup and Permissions
-Give yourself permissions to docker
-```bash
-sudo usermod -aG docker user
-```
-Now exit and switch user to update your permissions
-```bash
-exit && su user
-```
+### 2. Create the compose file
 
-Now make the folder to store your compose files
-``` bash
+```bash
 mkdir -p /data && cd /data
 nano docker-compose.yml
 ```
 
+Start everything:
 
-### 3. Launch the compose file
-Once your file is saved, start everything:
 ```bash
-sudo docker compose up -d
+docker compose up -d
 ```
-To view running containers:
-```bash
-docker ps
-```
-Different folders will be mix match between being created by root or the user. 
+
+Fix permissions if needed:
+
 ```bash
 sudo chown -R 1000:1000 /data
 ```
-### 4. Log onto jellyfin
-- Jellyfin — http://<your_ip>:8096
-	1.	Create an admin user and save credentials.
-	2.	Add media libraries:
-	-	/path/to/movie
-	-	/path/to/tvshows
 
-### 5. Log onto Qbittorrent
-- qBittorrent — http://<your_ip>:8080
-  1. Get the temporary password using:
-     ```bash
-     docker ps
-     ```
-  2. To get the container ID of qbitttorent
-	```bash
-	sudo docker logs  <container id>
- 	```
- 	The temp password should be at the bottom
-  3. go to tools webui to change password and press bypass auth for clients on local host
-  
-### 6. Log onto Radarr
-- Radarr — http://<your_ip>:7878
-- Create an admin user and save the credentials
-	1.	Set Authentication Method → Forms
-	2.	Navigate to Settings -> Download Clients -> Add -> Transmission 
-	3.	Navigate to Settings -> Media Management -> Add Root Folder 
-	4.	Navigate to Settings -> General -> API Key -> copy it for the next steps
- 	5.	Settings -> Download clients -> Add qbittorrent
-	
-### 7. Log onto Sonarr
-- Sonarr — http://<your_ip>:8989
-- Same steps as Radarr
+### 3. Jellyfin — `http://<IP>:8096`
 
-### 8. Log onto Prowlarr
-- Prowlarr — http://<your_ip>:9696
-- Create an admin user and save the credentials
-- Navigate to Settings -> Apps -> Add:
-	- 	Radarr (paste API key)
-	-	Sonarr (paste API key)
-- Go back to Indexers -> Add New Indexers
+1. Create admin user
+2. Add media libraries pointing to your movie and TV folders
 
-### 9. Log onto jellyseerr
-- Jellyseerr (optional) — http://<your_ip>:5055
-	1.	Log in with Jellyfin admin account.
-	2.	Add Radarr and Sonarr:
-	 -	Hostname: localhost
-	 -	Port: 7878 (Radarr), 8989 (Sonarr)
-	 -	API Keys: from previous steps
-	3.	Enable Movies + TV Shows
-	4.	Set Root folders /movies and /tv
-	5.	Enable scan:true
+### 4. qBittorrent — `http://<IP>:8080`
+
+1. Get the temporary password: `docker logs <container-id>`
+2. Change the password under **Tools → Web UI**
+
+### 5. Radarr — `http://<IP>:7878`
+
+1. Set Authentication Method to **Forms**
+2. **Settings → Download Clients** → Add qBittorrent
+3. **Settings → Media Management** → Add Root Folder
+4. **Settings → General** → copy API key for later
+
+### 6. Sonarr — `http://<IP>:8989`
+
+Same steps as Radarr.
+
+### 7. Prowlarr — `http://<IP>:9696`
+
+1. **Settings → Apps** → Add Radarr and Sonarr (paste API keys)
+2. **Indexers** → Add indexers
+
+### 8. Jellyseerr — `http://<IP>:5055`
+
+1. Log in with Jellyfin admin account
+2. Add Radarr and Sonarr with their API keys
+3. Set root folders and enable Movies + TV Shows
+
+## Verify
+
+```bash
+docker ps
+```
+
+All containers should show `Up`.
+
+## Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| Container not starting | `docker logs <container-id>` |
+| Permission denied on media folders | `sudo chown -R 1000:1000 /data` |
+| qBittorrent temp password not visible | Check bottom of `docker logs <container-id>` |
