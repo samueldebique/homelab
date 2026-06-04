@@ -1,4 +1,4 @@
-# Proxmox Post-Install Setup
+# Proxmox
 
 Essential steps after a fresh Proxmox VE install — fix repositories and update.
 
